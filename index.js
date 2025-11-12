@@ -21,7 +21,7 @@ async function run() {
     try {
         const propertiesCol = client.db('HomeNest').collection('properties');
         app.get('/properties', async (req, res) => {
-            const properties = await propertiesCol.find().toArray();
+            const properties = await propertiesCol.find().sort({ _id: -1 }).toArray();
             res.send(properties);
         });
 
