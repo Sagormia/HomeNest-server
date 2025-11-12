@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const app = express()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 3000
 const uri = "mongodb+srv://ksagorkhan081_db_user:oLOTGl3kBSmSAMFl@cluster0.keyvejn.mongodb.net/?appName=Cluster0"
 
@@ -9,7 +9,6 @@ app.use(cors())
 app.use(express.json())
 
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -30,6 +29,13 @@ async function run() {
             const data = req.body;
             const result = await propertiesCol.insertOne(data);
             res.send(result);
+        });
+
+        app.get('/properties/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id : new ObjectId(id) };
+            const result = await propertiesCol.findOne(query);
+            res.send(result);
         })
 
     } finally { }
@@ -44,6 +50,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
-
-// ksagorkhan081_db_user
-// oLOTGl3kBSmSAMFl
