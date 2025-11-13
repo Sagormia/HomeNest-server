@@ -43,6 +43,24 @@ async function run() {
             res.send(result);
         });
 
+        app.put('/properties/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedData = req.body;
+
+            try {
+                const result = await propertiesCol.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: updatedData }
+                );
+                if (result.matchedCount === 0) {
+                    return res.status(404).send({ success: false, message: "Property not found" });
+                }
+                res.send({ success: true, message: "Property updated successfully" });
+            } catch {
+                res.status(400).send({ success: false, message: "Invalid property ID" });
+            }
+        });
+
         app.delete('/properties/:id', async (req, res) => {
             const id = req.params.id;
             try {
