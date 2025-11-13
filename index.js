@@ -21,7 +21,13 @@ async function run() {
     try {
         const propertiesCol = client.db('HomeNest').collection('properties');
         app.get('/properties', async (req, res) => {
-            const properties = await propertiesCol.find().sort({ _id: -1 }).toArray();
+            const { email } = req.query;
+            let query = {};
+            if (email) {
+                query = { uemail: email };
+            }
+
+            const properties = await propertiesCol.find(query).sort({ _id: -1 }).toArray();
             res.send(properties);
         });
 
@@ -44,9 +50,9 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Hello World!')
+    res.send('HomeNest Server Running')
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`HomeNest server listening on port ${port}`)
 })
