@@ -23,23 +23,26 @@ async function run() {
         const propertiesCol = client.db('HomeNest').collection('properties');
         const reviewsCol = client.db('HomeNest').collection('reviews');
         app.get('/properties', async (req, res) => {
-            const { email } = req.query;
-            const {home} = req.query;
+            const { email, home, search, sort } = req.query;
             let query = {};
-            if (email) {
-                query = { uemail: email };
-            }
 
-            if (home) {
-                const properties = await propertiesCol.find().sort({ _id: -1 }).limit(6).toArray();
-                res.send(properties);
-            }
+            if (email) query.uemail = email;
 
-            const properties = await propertiesCol.find(query).toArray();
+            if (search) query.propertyName = { $regex: search, $options: "i" };
+
+            let cursor = propertiesCol.find(query);
+
+            if (sort === "newest") cursor = cursor.sort({ _id: -1 });
+            else if (sort === "oldest") cursor = cursor.sort({ _id: 1 });
+            else cursor = cursor.sort({ _id: -1 });
+
+            if (home) cursor = cursor.limit(6);
+
+            const properties = await cursor.toArray();
             res.send(properties);
         });
 
-        app.post('/properties', async(req, res) => {
+        app.post('/properties', async (req, res) => {
             const data = req.body;
             const result = await propertiesCol.insertOne(data);
             res.send(result);
@@ -47,7 +50,7 @@ async function run() {
 
         app.get('/properties/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id : new ObjectId(id) };
+            const query = { _id: new ObjectId(id) };
             const result = await propertiesCol.findOne(query);
             res.send(result);
         });
@@ -84,10 +87,18 @@ async function run() {
             }
         });
 
-        app.post('/reviews', async(req, res) => {
+        app.post('/reviews', async (req, res) => {
             const data = req.body;
             const result = await reviewsCol.insertOne(data);
             res.send(result);
+        });
+        
+        app.get('/reviews', async (req, res) => {
+            const { email } = req.query;
+            let query = {reviewerEmail:email};
+            let cursor = reviewsCol.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews);
         });
 
     } finally { }
