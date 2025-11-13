@@ -1,9 +1,10 @@
 const express = require('express')
 const cors = require('cors')
 const app = express()
+require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 3000
-const uri = "mongodb+srv://ksagorkhan081_db_user:oLOTGl3kBSmSAMFl@cluster0.keyvejn.mongodb.net/?appName=Cluster0"
+const uri = process.env.URI
 
 app.use(cors())
 app.use(express.json())
@@ -20,6 +21,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         const propertiesCol = client.db('HomeNest').collection('properties');
+        const reviewsCol = client.db('HomeNest').collection('reviews');
         app.get('/properties', async (req, res) => {
             const { email } = req.query;
             const {home} = req.query;
@@ -33,7 +35,7 @@ async function run() {
                 res.send(properties);
             }
 
-            const properties = await propertiesCol.find(query).sort({ _id: -1 }).toArray();
+            const properties = await propertiesCol.find(query).toArray();
             res.send(properties);
         });
 
@@ -80,6 +82,12 @@ async function run() {
             } catch (error) {
                 res.status(500).send({ success: false, message: error.message });
             }
+        });
+
+        app.post('/reviews', async(req, res) => {
+            const data = req.body;
+            const result = await reviewsCol.insertOne(data);
+            res.send(result);
         });
 
     } finally { }
