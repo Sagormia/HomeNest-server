@@ -26,7 +26,6 @@ async function run() {
             if (email) {
                 query = { uemail: email };
             }
-
             const properties = await propertiesCol.find(query).sort({ _id: -1 }).toArray();
             res.send(properties);
         });
@@ -42,7 +41,21 @@ async function run() {
             const query = { _id : new ObjectId(id) };
             const result = await propertiesCol.findOne(query);
             res.send(result);
-        })
+        });
+
+        app.delete('/properties/:id', async (req, res) => {
+            const id = req.params.id;
+            try {
+                const result = await propertiesCol.deleteOne({ _id: new ObjectId(id) });
+                if (result.deletedCount > 0) {
+                    res.status(200).send({ success: true, message: "Property deleted successfully" });
+                } else {
+                    res.status(404).send({ success: false, message: "Property not found" });
+                }
+            } catch (error) {
+                res.status(500).send({ success: false, message: error.message });
+            }
+        });
 
     } finally { }
 }
